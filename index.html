@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
     <!-- Inter font -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./Assets/style.css">
-    
+
     <title>Document</title>
 </head>
 
@@ -36,13 +36,28 @@
                     <h2>Most recent playlist</h2>
                     <p><span id="generated-playlist"></span></p>
                 </div>
+        
+                 <!-- The Modal -->
+                 <div id="myModal" class="modal">
+
+                     <!-- Modal content -->
+                     <div class="modal-content">
+                         <div class="modal-header">
+                         <span class="close">&times;</span>
+                         <h3>Model Header</h3>
+                     </div>
+                     <div class="model-body">
+                         <p>Generated your playlist below.</p>
+                     </div>
+
+                 </div>
             </div>
             <!-- Playlist generator -->
             <div>
                 <form class="m-3" id="playlist-form">
                     Starting Point: <input class="border-2 border-black" id="from" type="text">
                     Destination: <input class="border-2 border-black" type="text" id="to">
-                    <select  class="border-2 border-black m-1" id="genres-input">
+                    <select class="border-2 border-black m-1" id="genres-input">
                         <option disabled selected>Select a Genre ...</option>
                         <option value="pop">Pop</option>
                         <option value="country">Country</option>

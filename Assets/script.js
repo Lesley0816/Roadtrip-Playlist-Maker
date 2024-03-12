@@ -5,13 +5,44 @@ let generateBtn = document.querySelector("#generate-btn");
 let genplaylist = document.querySelector("#playlist-form");
 
 
+
+
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function () {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function (event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+
 // fucntion to get the generate button to give geo code for origin and destination and class the trip lenght function
 function generatePlaylist(event) {
-    
+
     // the point of origin api call for geo code
     departureApiUrl = "https://api.tomtom.com/search/2/geocode/" + departure.value + ".json?key=" + tomtomApi;
     let start = "";
     let end = "";
+    var modal = document.getElementById("myModal");
+    var span = document.getElementsByClassName("close")[0];
+    modal.style.display = "block";
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
     event.preventDefault();
 
     if (departure.value == null) {
@@ -30,15 +61,15 @@ function generatePlaylist(event) {
         })
         .then(data => {
             let departCor = data.results[0].position;
-            start = departCor.lat +"%2C"+ departCor.lon;// lat and lan of origin 
-            
+            start = departCor.lat + "%2C" + departCor.lon;// lat and lan of origin 
+
         })
 
         .catch(error => {
             console.error("Error: ", error);
         })
-    
-        
+
+
     // destination api call for geocoordinates
     arrivalApiUrl = "https://api.tomtom.com/search/2/geocode/" + arrival.value + ".json?key=" + tomtomApi;
     if (arrival.value == null) {
@@ -57,56 +88,56 @@ function generatePlaylist(event) {
         })
         .then(data => {
             let arrivalCor = data.results[0].position;// lan and lat of destination
-            end = arrivalCor.lat +"%2C"+ arrivalCor.lon;
+            end = arrivalCor.lat + "%2C" + arrivalCor.lon;
             console.log("start", start);
             console.log("end", end);
-           
 
-            tripLength(start,end);// calling the routing api to give trip length in minutes and pass start and end variables
+
+            tripLength(start, end);// calling the routing api to give trip length in minutes and pass start and end variables
         })
 
         .catch(error => {
             console.error("Error: ", error);
         })
 
-        let genre= document.getElementById("genres-input");
-        fetchRecommendations();
+    let genre = document.getElementById("genres-input");
+    fetchRecommendations();
 }
 
- 
+
 
 // eventlistner for the generate button
 genplaylist.addEventListener("submit", generatePlaylist);
 
 // the routing api call to get the trip length 
-function tripLength(begin,finish) {
-    tomApiUrl = "https://api.tomtom.com/routing/1/calculateRoute/"+begin +":"+ finish +"/json?key=" + tomtomApi
-    
+function tripLength(begin, finish) {
+    tomApiUrl = "https://api.tomtom.com/routing/1/calculateRoute/" + begin + ":" + finish + "/json?key=" + tomtomApi
+
 
 
     fetch(tomApiUrl)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Network reponse was not okay");
-        }
-        return response.json();
-    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network reponse was not okay");
+            }
+            return response.json();
+        })
 
-    .then(data => {
-        let minutes = data.routes[0].summary.travelTimeInSeconds;//travel time in sections
-        let time = minutes / 60;// chang travel time to minutes
-        console.log("minutes",time);
+        .then(data => {
+            let minutes = data.routes[0].summary.travelTimeInSeconds;//travel time in sections
+            let time = minutes / 60;// chang travel time to minutes
+            console.log("minutes", time);
 
-         
-    fetchRecommendations();
-        
-    })
 
-    .catch(error => {
-        console.error("Error: ", error);
-    })
+            fetchRecommendations();
 
-    
+        })
+
+        .catch(error => {
+            console.error("Error: ", error);
+        })
+
+
 }
 
 // eventlistner for the generate button
@@ -117,7 +148,7 @@ genplaylist.addEventListener("submit", generatePlaylist)
 
 const client_id = '732b07c591f7439f87bd99b0b6aa790c';
 const client_secret = 'a7bde92878de447ea11a977ca1dfd454';
-async function fetchToken () {
+async function fetchToken() {
     const res = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         body: 'grant_type=client_credentials&client_id=' + client_id + '&client_secret=' + client_secret,
@@ -129,26 +160,26 @@ async function fetchToken () {
     return parsedRes.access_token;
 }
 //Api call to get the recommendations
-async function fetchRecommendations () {
-    let genre= document.getElementById("genres-input").value;// gets the value of the dropdown menu
+async function fetchRecommendations() {
+    let genre = document.getElementById("genres-input").value;// gets the value of the dropdown menu
     console.log(genre);
     const token = await fetchToken();
     console.log("token", token);
     // Sample genres request with seed parameters
-    const res = await fetch('https://api.spotify.com/v1/recommendations?seed_genres='+genre+'',{
+    const res = await fetch('https://api.spotify.com/v1/recommendations?seed_genres=' + genre + '', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json' // optional
         }
-        
+
     });
     showTracks(await res.json());
-    
+
 
 }
 // renders the tracks 
-async function showTracks (response) {
+async function showTracks(response) {
     console.log(response);
     const recommendations = response.tracks;
     for (const track of recommendations) {

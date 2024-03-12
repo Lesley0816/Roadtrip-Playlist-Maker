@@ -1,13 +1,13 @@
 *{
      
-  font-family: "Quicksand", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 500;
-  font-style: normal;
-
-}
-
-
-button:hover{
-    background-color: blueviolet;
-}
+    font-family: "Quicksand", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+  
+  }
+  
+  
+  button:hover{
+      background-color: blueviolet;
+  }
