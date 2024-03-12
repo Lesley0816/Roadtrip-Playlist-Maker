@@ -3,26 +3,14 @@ let arrival = document.querySelector("#to");
 let departure = document.querySelector('#from');
 let generateBtn = document.querySelector("#generate-btn");
 let genplaylist = document.querySelector("#playlist-form");
-let generatedPlaylist = document.querySelector("#generated-playlist");
 let searchHistory = document.querySelector("#search-history");
 let playlistLibrary = document.querySelector("#playlist-library");
+let songList = document.querySelector("#song-list");
 let playlists = [];
 
 
 
 
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function () {
-    modal.style.display = "none";
-}
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function (event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
 
 
 // fucntion to get the generate button to give geo code for origin and destination and class the trip lenght function
@@ -32,9 +20,12 @@ function generatePlaylist(event) {
     departureApiUrl = "https://api.tomtom.com/search/2/geocode/" + departure.value + ".json?key=" + tomtomApi;
     let start = "";
     let end = "";
+
     var modal = document.getElementById("myModal");
     var span = document.getElementsByClassName("close")[0];
+
     modal.style.display = "block";
+
     // When the user clicks on <span> (x), close the modal
     span.onclick = function () {
         modal.style.display = "none";
@@ -46,6 +37,20 @@ function generatePlaylist(event) {
             modal.style.display = "none";
         }
     }
+
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
 
     event.preventDefault();
 
@@ -108,8 +113,8 @@ function generatePlaylist(event) {
     let genre = document.getElementById("genres-input");
     fetchRecommendations();
 
-        storePlaylists();
-        renderPlaylists();
+
+    renderPlaylists();
 }
 
 
@@ -132,12 +137,16 @@ function tripLength(begin, finish) {
         })
 
         .then(data => {
-            let minutes = data.routes[0].summary.travelTimeInSeconds;//travel time in sections
-            let time = minutes / 60;// chang travel time to minutes
-            console.log("minutes", time);
+            let seconds = data.routes[0].summary.travelTimeInSeconds;//travel time in sections
+            let milliseconds = seconds * 1000;
+            let minutes = seconds / 60;// chang travel time to minutes
+            console.log("minutes", minutes);
+            console.log("milliseconds", milliseconds);
 
 
             fetchRecommendations();
+            // createPlaylistWithExtraTime(milliseconds);
+
 
         })
 
@@ -186,6 +195,10 @@ async function fetchRecommendations() {
 
 
 }
+
+
+
+
 // renders the tracks 
 async function showTracks(response) {
     console.log("response", response);
@@ -197,59 +210,46 @@ async function showTracks(response) {
         console.log("duration", formatDuration(track.duration_ms));
         console.log("album", track.album.name)
         console.log("track id", track.uri)
-        console.log("track number", track.track_number)
+        console.log("index #", recommendations[0].uri);
         console.log("*********\n\n")
-    }
+//creates the buttons with the song names
+        let song = document.createElement("button");
+        song.classList.add("song");
+        song.dataset.spotifyId = track.uri;
+        song.textContent = track.name;
+// creates an embeded link for the spotify player
+        window.onSpotifyIframeApiReady = (IFrameAPI) => {
+            const element = document.getElementById('embed-iframe');
+            const options = {
+                width: '100%',
+        
+                uri: recommendations[0].uri
+            };
+            const callback = (EmbedController) => {
+                // lets you pick form the buttons on the page what song you want to switch the player to
+                document.querySelectorAll(".song").forEach(
+                    song => {
+                        song.addEventListener('click', () => {
+                            EmbedController.loadUri(song.dataset.spotifyId)
+                        });
+                    })
 
-   
-    
+            };
+            IFrameAPI.createController(element, options, callback);
+        };
+// adds the buttons to the html 
+        songList.appendChild(song);
+// saves the songs as an obejct to save in local storage.
+        let songObject = {
+            name: track.name,
+            url: track.external_urls.spotify
+        };
+        playlists.push(songObject)
+    }
+    //calls local storage.
+    storePlaylists();
 }
 
-// fetch call to create a playlist 
-async function fetchCreatePlaylist () {
-    const token = await fetchToken();
-    console.log("token", token);
-    // create playlist request
-    const resCreatePlaylist = await fetch ('https://api.spotify.com/v1/users/31kfksypgskzynzrmosohbcjtfgm/playlists',{
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json' // optional
-    },
-    
-    data: {
-        "name": "Road trip Playlist",
-        "description": "Playlist that was created through Road trip playlist generator",
-        "public": true
-    }
-    
-});
-const parsedRes = await resCreatePlaylist.json();
-console.log("created playlist", parsedRes);
-}
-
- console.log(fetchCreatePlaylist());
-
-// fetch call to add songs to playlist
-async function fetchAddsongs(){
-    const token = await fetchToken();
-    // add songs to play list request call
-    const resAddItems = await fetch ('https://api.spotify.com/v1/playlists/{playlist-id}/tracks?&uris=spotify%3Atrack%3A{trackuri}', {
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json' // optional
-    },
-    
-    data: {
-        "uris": [
-            "{song-uri}"
-        ],
-        "position": 0
-    }
-});
-
-}
 
 // formats the length of the tracks from millisecond to minutes
 function formatDuration(duration_ms) {
@@ -273,11 +273,11 @@ function formatDuration(duration_ms) {
 
 
 // fucntion renders playlists generated into a list as li elements
-function renderPlaylists(){
+function renderPlaylists() {
     playlistLibrary.innerHTML = "";
     searchHistory.textContent = playlists.length;
 
-    for ( let i = 0; i <playlists.length; i ++){
+    for (let i = 0; i < playlists.length; i++) {
         let li = document.createElement("li");
         li.textContent = playlists;
         li.setAttribute("data-index", i)
@@ -288,11 +288,11 @@ function renderPlaylists(){
 
 };
 // function to get stored playslist 
-function storedPlaylists(){
+function storedPlaylists() {
 
     let storedGeneratedPlaylists = JSON.parse(localStorage.getItem("playlists"));
 
-    if (storedGeneratedPlaylists !== null ){
+    if (storedGeneratedPlaylists !== null) {
         playlists = storedGeneratedPlaylists;
     }
 
@@ -300,10 +300,33 @@ function storedPlaylists(){
 
 };
 // stringify and set key in localstorage for the playlists
-function storePlaylists(){
-     localStorage.setItem("playlists", JSON.stringify(playlists));
+function storePlaylists() {
+    localStorage.setItem("playlists", JSON.stringify(playlists));
 }
 
 console.log(localStorage);
 // calls the store
 storedPlaylists();
+
+// // Function to create a playlist with a duration slightly above the allotted time
+// async function createPlaylistWithExtraTime(tomtime) {
+//     const tripTime = tomtime;
+//     // const targetDuration = 3600000; // 1 hour in milliseconds (adjust as needed)
+//     const extraTime = 60000; // 1 minutes in milliseconds (adjust as needed)
+//     let currentDuration = 0;
+//     const tracksToAdd = [];
+//     while (currentDuration < tripTime + extraTime) {
+//         const recommendations = await fetchRecommendations(); // Use your existing fetchRecommendations function
+//         for (const track of recommendations.tracks) {
+//             const trackDuration = track.duration_ms || 0;
+//             if (currentDuration + trackDuration <= tripTime + extraTime) {
+//                 // Add the track to the playlist
+//                 tracksToAdd.push(track.uri);
+//                 currentDuration += trackDuration;
+//             } else {
+//                 // Break out of the loop if adding the track exceeds the target duration
+//                 break;
+//             }
+//         }
+//     }
+// }
