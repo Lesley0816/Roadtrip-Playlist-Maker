@@ -3,6 +3,10 @@ let arrival = document.querySelector("#to");
 let departure = document.querySelector('#from');
 let generateBtn = document.querySelector("#generate-btn");
 let genplaylist = document.querySelector("#playlist-form");
+let generatedPlaylist = document.querySelector("#generated-playlist");
+let searchHistory = document.querySelector("#search-history");
+let playlistLibrary = document.querySelector("#playlist-library");
+let playlists = [];
 
 
 
@@ -44,6 +48,7 @@ function generatePlaylist(event) {
     }
 
     event.preventDefault();
+
 
     if (departure.value == null) {
         alert("Add your destination");
@@ -102,6 +107,9 @@ function generatePlaylist(event) {
 
     let genre = document.getElementById("genres-input");
     fetchRecommendations();
+
+        storePlaylists();
+        renderPlaylists();
 }
 
 
@@ -180,7 +188,7 @@ async function fetchRecommendations() {
 }
 // renders the tracks 
 async function showTracks(response) {
-    console.log(response);
+    console.log("response", response);
     const recommendations = response.tracks;
     for (const track of recommendations) {
         console.log("*********")
@@ -188,9 +196,61 @@ async function showTracks(response) {
         console.log("track", track.name)
         console.log("duration", formatDuration(track.duration_ms));
         console.log("album", track.album.name)
+        console.log("track id", track.uri)
+        console.log("track number", track.track_number)
         console.log("*********\n\n")
     }
+
+   
+    
 }
+
+// fetch call to create a playlist 
+async function fetchCreatePlaylist () {
+    const token = await fetchToken();
+    console.log("token", token);
+    // create playlist request
+    const resCreatePlaylist = await fetch ('https://api.spotify.com/v1/users/31kfksypgskzynzrmosohbcjtfgm/playlists',{
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json' // optional
+    },
+    
+    data: {
+        "name": "Road trip Playlist",
+        "description": "Playlist that was created through Road trip playlist generator",
+        "public": true
+    }
+    
+});
+const parsedRes = await resCreatePlaylist.json();
+console.log("created playlist", parsedRes);
+}
+
+ console.log(fetchCreatePlaylist());
+
+// fetch call to add songs to playlist
+async function fetchAddsongs(){
+    const token = await fetchToken();
+    // add songs to play list request call
+    const resAddItems = await fetch ('https://api.spotify.com/v1/playlists/{playlist-id}/tracks?&uris=spotify%3Atrack%3A{trackuri}', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json' // optional
+    },
+    
+    data: {
+        "uris": [
+            "{song-uri}"
+        ],
+        "position": 0
+    }
+});
+
+}
+
 // formats the length of the tracks from millisecond to minutes
 function formatDuration(duration_ms) {
     // Convert milliseconds to seconds
@@ -209,3 +269,41 @@ function formatDuration(duration_ms) {
     return formattedDuration;
 }
 
+
+
+
+// fucntion renders playlists generated into a list as li elements
+function renderPlaylists(){
+    playlistLibrary.innerHTML = "";
+    searchHistory.textContent = playlists.length;
+
+    for ( let i = 0; i <playlists.length; i ++){
+        let li = document.createElement("li");
+        li.textContent = playlists;
+        li.setAttribute("data-index", i)
+
+        playlistLibrary.appendChild(li);
+    }
+
+
+};
+// function to get stored playslist 
+function storedPlaylists(){
+
+    let storedGeneratedPlaylists = JSON.parse(localStorage.getItem("playlists"));
+
+    if (storedGeneratedPlaylists !== null ){
+        playlists = storedGeneratedPlaylists;
+    }
+
+    renderPlaylists();
+
+};
+// stringify and set key in localstorage for the playlists
+function storePlaylists(){
+     localStorage.setItem("playlists", JSON.stringify(playlists));
+}
+
+console.log(localStorage);
+// calls the store
+storedPlaylists();
