@@ -6,6 +6,12 @@
     font-style: normal;
   
   }
+
+  header{
+    background-color: purple;
+    color: white;
+    
+  }
   
 .modal{
     position: fixed;

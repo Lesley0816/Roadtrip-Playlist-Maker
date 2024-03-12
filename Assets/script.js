@@ -14,13 +14,14 @@ let playlists = [];
 
 
 // fucntion to get the generate button to give geo code for origin and destination and class the trip lenght function
-function generatePlaylist(event) {
+async function generatePlaylist(event) {
 
     // the point of origin api call for geo code
     departureApiUrl = "https://api.tomtom.com/search/2/geocode/" + departure.value + ".json?key=" + tomtomApi;
     let start = "";
     let end = "";
 
+    // for modal 
     var modal = document.getElementById("myModal");
     var span = document.getElementsByClassName("close")[0];
 
@@ -53,6 +54,7 @@ function generatePlaylist(event) {
 
 
     event.preventDefault();
+
 
 
     if (departure.value == null) {
@@ -110,11 +112,11 @@ function generatePlaylist(event) {
             console.error("Error: ", error);
         })
 
-    let genre = document.getElementById("genres-input");
-    fetchRecommendations();
+    await fetchRecommendations();
 
 
     renderPlaylists();
+    storePlaylists();
 }
 
 
@@ -139,13 +141,13 @@ function tripLength(begin, finish) {
         .then(data => {
             let seconds = data.routes[0].summary.travelTimeInSeconds;//travel time in sections
             let milliseconds = seconds * 1000;
-            let minutes = seconds / 60;// chang travel time to minutes
+            let minutes = seconds / 60;// change travel time to minutes
             console.log("minutes", minutes);
             console.log("milliseconds", milliseconds);
 
 
             fetchRecommendations();
-            // createPlaylistWithExtraTime(milliseconds);
+            time(milliseconds);
 
 
         })
@@ -197,8 +199,6 @@ async function fetchRecommendations() {
 }
 
 
-
-
 // renders the tracks 
 async function showTracks(response) {
     console.log("response", response);
@@ -212,17 +212,27 @@ async function showTracks(response) {
         console.log("track id", track.uri)
         console.log("index #", recommendations[0].uri);
         console.log("*********\n\n")
-//creates the buttons with the song names
+        //creates the buttons with the song names
         let song = document.createElement("button");
         song.classList.add("song");
         song.dataset.spotifyId = track.uri;
         song.textContent = track.name;
-// creates an embeded link for the spotify player
+        // adds the buttons to the html 
+        songList.appendChild(song);
+        // saves the songs as an obejct to save in local storage.
+        let songObject = {
+            name: track.name,
+            url: track.external_urls.spotify
+        };
+        playlists.push(songObject);
+    }
+
+
+    //  creates an embeded link for the spotify player
         window.onSpotifyIframeApiReady = (IFrameAPI) => {
             const element = document.getElementById('embed-iframe');
             const options = {
                 width: '100%',
-        
                 uri: recommendations[0].uri
             };
             const callback = (EmbedController) => {
@@ -234,18 +244,8 @@ async function showTracks(response) {
                         });
                     })
 
-            };
-            IFrameAPI.createController(element, options, callback);
+            }; IFrameAPI.createController(element, options, callback);
         };
-// adds the buttons to the html 
-        songList.appendChild(song);
-// saves the songs as an obejct to save in local storage.
-        let songObject = {
-            name: track.name,
-            url: track.external_urls.spotify
-        };
-        playlists.push(songObject)
-    }
     //calls local storage.
     storePlaylists();
 }
@@ -274,12 +274,12 @@ function formatDuration(duration_ms) {
 
 // fucntion renders playlists generated into a list as li elements
 function renderPlaylists() {
-    playlistLibrary.innerHTML = "";
-    searchHistory.textContent = playlists.length;
+    playlistLibrary.innerHTML = '';
 
     for (let i = 0; i < playlists.length; i++) {
-        let li = document.createElement("li");
-        li.textContent = playlists;
+        let playlist = playlists[i];
+        let li = document.createElement("ol");
+        li.textContent = playlist;
         li.setAttribute("data-index", i)
 
         playlistLibrary.appendChild(li);
@@ -305,28 +305,35 @@ function storePlaylists() {
 }
 
 console.log(localStorage);
-// calls the store
-storedPlaylists();
 
-// // Function to create a playlist with a duration slightly above the allotted time
-// async function createPlaylistWithExtraTime(tomtime) {
-//     const tripTime = tomtime;
-//     // const targetDuration = 3600000; // 1 hour in milliseconds (adjust as needed)
-//     const extraTime = 60000; // 1 minutes in milliseconds (adjust as needed)
-//     let currentDuration = 0;
-//     const tracksToAdd = [];
-//     while (currentDuration < tripTime + extraTime) {
-//         const recommendations = await fetchRecommendations(); // Use your existing fetchRecommendations function
-//         for (const track of recommendations.tracks) {
-//             const trackDuration = track.duration_ms || 0;
-//             if (currentDuration + trackDuration <= tripTime + extraTime) {
-//                 // Add the track to the playlist
-//                 tracksToAdd.push(track.uri);
-//                 currentDuration += trackDuration;
-//             } else {
-//                 // Break out of the loop if adding the track exceeds the target duration
-//                 break;
-//             }
-//         }
-//     }
-// }
+
+// Function to create a playlist with a duration slightly above the allotted time
+async function time(tomtime) {
+    //trip time length
+    const tripTime = tomtime;
+    const extraTime = 60000; // 1 minutes in milliseconds (adjust as needed)
+    let currentDuration = 0;
+    let totalTrackTime = tripTime + extraTime; 
+    const tracksToAdd = [];
+
+    while (currentDuration < totalTrackTime) {
+        const recommendations = await fetchRecommendations(); // Use your existing fetchRecommendations function
+        for (const track of recommendations){
+            const trackDuration = track.duration_ms || 0;
+            const totalDuration = currentDuration + trackDuration;
+            if (totalDuration <= totalTrackTime) {
+                // Add the track to the playlist
+                tracksToAdd.push(track.uri);
+                currentDuration += trackDuration;
+            } else {
+                // Break out of the loop if adding the track exceeds the target duration
+                break;
+            }
+        }
+    }
+
+
+}
+
+// calls the stored playlists
+storedPlaylists();
