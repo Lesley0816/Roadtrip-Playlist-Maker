@@ -9,10 +9,6 @@ let songList = document.querySelector("#song-list");
 let playlists = [];
 
 
-
-
-
-
 // fucntion to get the generate button to give geo code for origin and destination and class the trip lenght function
 async function generatePlaylist(event) {
 
@@ -101,9 +97,6 @@ async function generatePlaylist(event) {
         .then(data => {
             let arrivalCor = data.results[0].position;// lan and lat of destination
             end = arrivalCor.lat + "%2C" + arrivalCor.lon;
-            console.log("start", start);
-            console.log("end", end);
-
 
             tripLength(start, end);// calling the routing api to give trip length in minutes and pass start and end variables
         })
@@ -140,13 +133,9 @@ function tripLength(begin, finish) {
 
         .then(data => {
             let seconds = data.routes[0].summary.travelTimeInSeconds;//travel time in sections
-            let milliseconds = seconds * 1000;
-            let minutes = seconds / 60;// change travel time to minutes
-            console.log("minutes", minutes);
-            console.log("milliseconds", milliseconds);
+            let milliseconds = seconds * 1000// change travel time to miliseconds
 
 
-            fetchRecommendations();
             time(milliseconds);
 
 
@@ -181,9 +170,7 @@ async function fetchToken() {
 //Api call to get the recommendations
 async function fetchRecommendations() {
     let genre = document.getElementById("genres-input").value;// gets the value of the dropdown menu
-    console.log(genre);
     const token = await fetchToken();
-    console.log("token", token);
     // Sample genres request with seed parameters
     const res = await fetch('https://api.spotify.com/v1/recommendations?seed_genres=' + genre + '', {
         method: 'GET',
@@ -201,17 +188,8 @@ async function fetchRecommendations() {
 
 // renders the tracks 
 async function showTracks(response) {
-    console.log("response", response);
     const recommendations = response.tracks;
     for (const track of recommendations) {
-        console.log("*********")
-        console.log("artists", track.artists.map(artist => artist.name).join(", "));
-        console.log("track", track.name)
-        console.log("duration", formatDuration(track.duration_ms));
-        console.log("album", track.album.name)
-        console.log("track id", track.uri)
-        console.log("index #", recommendations[0].uri);
-        console.log("*********\n\n")
         //creates the buttons with the song names
         let song = document.createElement("button");
         song.classList.add("song");
@@ -248,6 +226,7 @@ async function showTracks(response) {
         };
     //calls local storage.
     storePlaylists();
+    
 }
 
 
@@ -274,10 +253,10 @@ function formatDuration(duration_ms) {
 
 // fucntion renders playlists generated into a list as li elements
 function renderPlaylists() {
-    playlistLibrary.innerHTML = '';
+    playlistLibrary.innerHTML = "";
 
     for (let i = 0; i < playlists.length; i++) {
-        let playlist = playlists[i];
+        let playlist = playlists[i].name;
         let li = document.createElement("ol");
         li.textContent = playlist;
         li.setAttribute("data-index", i)
@@ -285,8 +264,21 @@ function renderPlaylists() {
         playlistLibrary.appendChild(li);
     }
 
-
+    
 };
+
+
+function localStorageRender(){
+
+    if (localStorage.getItem("playlists")){
+        for (song of playlists){
+            let songItem = document.createElement("ol");
+            songItem.textContent = song.name;
+
+            playlistLibrary.appendChild(songItem);
+        }
+    }
+}
 // function to get stored playslist 
 function storedPlaylists() {
 
@@ -303,8 +295,6 @@ function storedPlaylists() {
 function storePlaylists() {
     localStorage.setItem("playlists", JSON.stringify(playlists));
 }
-
-console.log(localStorage);
 
 
 // Function to create a playlist with a duration slightly above the allotted time
@@ -337,3 +327,4 @@ async function time(tomtime) {
 
 // calls the stored playlists
 storedPlaylists();
+localStorageRender();
