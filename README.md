@@ -2,7 +2,10 @@
 
 # Overview 
 Roadster Playlist Generator is a web application that allows users to generate playlists for their road trips based on their starting point, destination, and preferred music genres.
-
+# Contributers 
+- Alexis Merino Perez
+- Lesley McGregor
+- Ethan Landeros
 ## Web Site
 https://lesley0816.github.io/Roadtrip-Playlist-Maker/
 ## mockup
