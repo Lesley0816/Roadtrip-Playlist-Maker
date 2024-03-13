@@ -1,0 +1,78 @@
+*{
+     
+    font-family: "Quicksand", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+  
+  }
+
+  body{
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+  }
+  header{
+    background-color: purple;
+    color: white;
+    
+  }
+  
+.modal{
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left:0;
+    top:0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color:black ;
+    background-color: rgba(0,0,0,0.4);
+
+}  
+
+
+.modal-content{
+    background-color: #a78bfa;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid indigo;
+    width: 80%;
+}
+.close {
+    color: blueviolet;
+    float: right;
+    font-size: 25px;
+    font-weight: bold;
+  } 
+
+  button:hover{
+      background-color: blueviolet;
+  }
+
+
+  .songs{
+    display:flex;
+    flex-direction: column;
+  }
+
+  .song {
+    min-width: max-content;
+    margin:14px;
+    padding:10px;
+    border-radius: 10px;
+    border: 0;
+    background:black ;
+    color:white;
+    cursor: pointer;
+  }
+
+.song:hover {
+
+    background-color: blueviolet;
+    
+}
+
+@media screen and (min-width:860px){
+
+    
+}

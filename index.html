@@ -1,31 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+    <!-- Inter font -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./Assets/style.css">
-    <title>Document</title>
+
+    <title>Roadster playlist generator</title>
 </head>
 
 <body>
+    <!-- Title  -->
     <header>
-        <h1>Roadtrip Playlist Maker</h1>
-        
+        <h1 class="text-start text-5xl pt-10 pb-10 pl-10 bg-indigo-500">Roadster</h1>
+        <nav></nav>
     </header>
 
-    <main>
+    <main class="container mx-auto px-4">
         <!-- playlist storage -->
-        <div></div>
-        <!--Most Recent playlist  -->
-        <div></div>
-        <!-- Playlist generator -->
-        <div></div>
-        
+        <div class="mt-4 bg-white border-8 rounded border-indigo-400">
+            <div id="search-history">
+                <h2 class="text-center text-3xl">Your Library</h2>
+                <div id="playlist-library">
+
+                </div>
+            </div>
+        </div>
+        <div class="border-8 bg-white rounded border-indigo-400 m-4 ">
+
+            <div class="border-4 rounded border-black m-4">
+                <!-- The Modal -->
+                <div id="myModal" class="modal hidden">
+
+                    <!-- Modal content -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <span class="close">&times;</span>
+                        </div>
+                        <div class="model-body">
+                            <p>Generated your playlist below.</p>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- Playlist generator -->
+                <divm class="text-center">
+                    <h2 class="text-3xl">Playlist Generator</h2>
+                    <form class="m-3 mx-auto" id="playlist-form">
+                        Starting Point: <input class=" rounded border-2 border-black" id="from" type="text">
+                        Destination: <input class=" rounded border-2 border-black" type="text" id="to">
+                        <select class="border-2 border-black m-1" id="genres-input">
+                            <option disabled selected>Select a Genre ...</option>
+                            <option value="pop">Pop</option>
+                            <option value="country">Country</option>
+                            <option value="rock">Rock</option>
+                            <option value="jazz">Jazz</option>
+                            <option value="classical">Classical</option>
+                        </select>
+
+                        <button class="border-2 border-black p-1 m-3 rounded" id="generate-btn">Generate</button>
+
+                    </form>
+
+            </div>
+        </div>
+        </div>
+        <div class="px-4 bg-white border-8 rounded border-indigo-400 m-4  ">
+
+            <!--Current song selected  -->
+            <div>
+                <h2 class="text-center font-bold text-3xl p-4" id="current-song">Current Song</h2>
+                <div class="mx-auto">
+                    <div id="embed-iframe"></div>
+                </div>
+            </div>
+
+            <div class="songs" id="song-list">
+
+            </div>
+        </div>
+
     </main>
-    
-    
 
 
-<script src="./Assets/script.js"></script>
+    <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+
+    <script src="./Assets/script.js"></script>
 </body>
+
 </html>
